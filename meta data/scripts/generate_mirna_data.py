@@ -189,6 +189,114 @@ class meta_data(object):
 		else:
 			return None
 
+
+class collect_meta_data_from_mirbase(object):
+	"""docstring for collect_meta_data_from_mirbase"""
+	def __init__(self):
+		pass
+
+	def extract(self, mirna_meta_data):
+		mirbase_data = {}
+		with open('../../data/miRNA.dat') as data_file:
+			data = SeqIO.parse(data_file, 'embl')
+			for record in data:
+				mirna = record.name
+				if 'hsa' in mirna:
+					mirbase_data[mirna] = {}
+					abc = {}
+					if 'accessions' in record.annotations.keys():
+						mirbase_data[mirna]['Accession ID'] = record.annotations['accessions']
+					else:
+						mirbase_data[mirna]['Accession ID'] = record.id
+
+					mirbase_data[mirna]['Name'] = record.name
+					mirbase_data[mirna]['Description'] = record.description
+					mirbase_data[mirna]['Database cross-references'] = record.dbxrefs
+					
+					if 'comment' in record.annotations.keys():
+						mirbase_data[mirna]['comment'] = record.annotations['comment']
+					if 'references' in record.annotations.keys():
+						# print type(record.annotations['references'])
+						mirbase_data[mirna]['citations'] = {}
+						for i in range(0,len(record.annotations['references'])):
+							mirbase_data[mirna]['citations'][i] = {}
+							mirbase_data[mirna]['citations'][i]['title'] = record.annotations['references'][i].title
+							mirbase_data[mirna]['citations'][i]['authors'] = record.annotations['references'][i].authors
+							mirbase_data[mirna]['citations'][i]['journal'] = record.annotations['references'][i].journal
+					
+					product_dict = {}
+					for feature in record.features:
+						# feature - contains a undecipherable format of the features
+						# feature.qualifiers - a Python dictionary of additional decipherable information about the feature.
+						# products - returns a list, but generally contains one product only
+						# print feature.qualifiers
+						if 'product' in feature.qualifiers.keys():
+							products = feature.qualifiers['product']
+							for product in products:
+								product_dict[product] = {}
+								for key, value in feature.qualifiers.items():
+									product_dict[product][key] = value
+								# print feature.qualifiers['experiment']
+					mirbase_data[mirna]['products'] = product_dict
+			mirna_meta_data_including_mirbase = collect_meta_data_from_mirbase.extend_meta_data(mirbase_data, mirna_meta_data)
+			return mirna_meta_data_including_mirbase
+
+
+	def extend_meta_data(mirbase_data, mirna_meta_data):
+		mirna_meta_data_including_mirbase = {}
+		for mirna in mirna_meta_data:
+			mirna_meta_data_including_mirbase[mirna] = {}
+			for fam_mirna in mirbase_data.keys():
+				if mirna in mirbase_data[fam_mirna]['products'].keys():
+					for keys, info in mirbase_data[fam_mirna]['products'][mirna].items():
+						mirna_meta_data_including_mirbase[mirna][keys] = info
+
+					for key, value in mirbase_data[fam_mirna].items():
+						if not key == 'products':
+							mirna_meta_data_including_mirbase[mirna][key] = value
+
+					for key, value in mirna_meta_data[mirna].items():
+						mirna_meta_data_including_mirbase[mirna][key] = value
+
+					mirna_meta_data_including_mirbase[mirna]['family'] = fam_mirna
+
+		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna_meta_data_including_mirbase.json')
+		return mirna_meta_data_including_mirbase
+
+
+class cross_references_from_ncbi(object):
+	"""docstring for cross_references_from_ncbi"""
+	def __init__(self):
+		pass
+
+	def id_dict(self, data, mirna_meta_data_including_mirbase):
+		dictionary = {}
+		for line in data:
+			lis = []
+			if 'miRBase' in line[5]:
+				accession = line[5].split('miRBase:')[1]
+				for ele in line[5].split('|'):
+					if 'HGNC' in ele:
+						hgnc_id = 'HGNC' + str(ele.split('HGNC')[2])
+						lis.append(hgnc_id)
+					else:
+						lis.append(ele)
+				dictionary[accession] = lis
+		cross_references_from_ncbi.append_ids(dictionary, mirna_meta_data_including_mirbase)
+
+	def append_ids(dictionary, mirna_meta_data_including_mirbase):
+		more_ids = {}
+		for mirna in mirna_meta_data_including_mirbase.keys():
+			if 'Accession ID' in mirna_meta_data_including_mirbase[mirna].keys():
+				accession = mirna_meta_data_including_mirbase[mirna]['Accession ID'][0]
+				lis = dictionary[accession]
+				# print lis
+				for ele in lis:
+					if not ele in mirna_meta_data_including_mirbase[mirna]['Database cross-references']:
+						mirna_meta_data_including_mirbase[mirna]['Database cross-references'].append(ele)
+		jsonify(mirna_meta_data_including_mirbase, '../output_data/miRNA_meta_data_complete.json')
+		
+
 def jsonify(dictionary, filename, text='None'):
 	a = json.dumps(dictionary, sort_keys=True, indent=4, separators=(',', ': '))
 	with open(str(filename), 'w') as outfile:
@@ -206,21 +314,19 @@ if __name__ == '__main__':
 	cross_references_instance = cross_references_from_ncbi()
 	with open('../../data/hsa_MTI.tsv', 'r') as infile:
 		mirtar = csv.reader(infile, dialect = 'excel-tab', skipinitialspace = True)
-		# intronic_mirna_map = instance.generate_map(mirtar)
+		intronic_mirna_map = instance.generate_map(mirtar)
 
-		# mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
-	with open('../output_data/mirna_map_dict.json', 'r') as infile:
-		intronic_mirna_map = json.loads(infile.read())
 		mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
+	# with open('../output_data/mirna_map_dict.json', 'r') as infile:
+	# 	intronic_mirna_map = json.loads(infile.read())
+	# 	mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
 
-		# mirbase_meta_data_instance.extract(mirna_meta_data)
-		# mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extend_meta_data()
+		mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extract(mirna_meta_data)
 	# with open('../output_data/mirna_meta_data_test.json', 'r') as infile:
 	# 	mirna_meta_data = json.loads(infile.read())
-	# 	mirbase_meta_data_instance.extract(mirna_meta_data)
-	# 	mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extend_meta_data()
+	# 	mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extract(mirna_meta_data)
 
-	# with open('./mirna_data/Homo_sapiens.gene_info', 'r') as infile:
-	# 	data = csv.reader(infile, 'excel-tab')
-	# 	next(data)
-	# 	cross_references_from_ncbi.id_dict(data, mirna_meta_data_including_mirbase)
+		with open('../../data/Homo_sapiens.gene_info', 'r') as infile:
+			data = csv.reader(infile, 'excel-tab')
+			next(data)
+			cross_references_instance.id_dict(data, mirna_meta_data_including_mirbase)
