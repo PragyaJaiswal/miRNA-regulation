@@ -3,7 +3,8 @@
 
 import os, sys
 import json, csv, re
-import math
+from Bio import SeqIO
+import Bio
 
 class restructure_data(object):
 	"""docstring for restructure_data"""
@@ -47,6 +48,147 @@ class restructure_data(object):
 			print(len(final_intronic_dict.keys()))
 			return final_intronic_dict
 
+
+class meta_data(object):
+	"""docstring for meta_data"""
+	def __init__(self):
+		pass
+
+	def ensembl_coordinates_to_py(self, intronic_mirna_map):
+		print('Forming ensembl coordinates dictionary.')
+		gene_dict = {}
+		with open('../../data/gene_coordinates_from_ensembl.tsv', 'r') as gene_file:
+			gene_data = csv.reader(gene_file, dialect = 'excel-tab', skipinitialspace = True)
+			next(gene_data, None)
+			for each_line in gene_data:
+				if each_line[1] in gene_dict.keys():
+					if each_line[0] in gene_dict[each_line[1]].keys():
+						gene_dict[each_line[1]][each_line[0]]['start'] = int(each_line[2])
+						gene_dict[each_line[1]][each_line[0]]['end'] = int(each_line[3])
+						gene_dict[each_line[1]][each_line[0]]['gene_name'] = str(each_line[4])
+						gene_dict[each_line[1]][each_line[0]]['transcript_count'] = int(each_line[5])
+					else:
+						gene_dict[each_line[1]][each_line[0]] = {}
+						gene_dict[each_line[1]][each_line[0]]['start'] = int(each_line[2])
+						gene_dict[each_line[1]][each_line[0]]['end'] = int(each_line[3])
+						gene_dict[each_line[1]][each_line[0]]['gene_name'] = str(each_line[4])
+						gene_dict[each_line[1]][each_line[0]]['transcript_count'] = int(each_line[5])
+				else:
+					gene_dict[each_line[1]] = {}
+					if each_line[0] in gene_dict[each_line[1]].keys():
+						gene_dict[each_line[1]][each_line[0]]['start'] = int(each_line[2])
+						gene_dict[each_line[1]][each_line[0]]['end'] = int(each_line[3])
+						gene_dict[each_line[1]][each_line[0]]['gene_name'] = str(each_line[4])
+						gene_dict[each_line[1]][each_line[0]]['transcript_count'] = int(each_line[5])
+					else:
+						gene_dict[each_line[1]][each_line[0]] = {}
+						gene_dict[each_line[1]][each_line[0]]['start'] = int(each_line[2])
+						gene_dict[each_line[1]][each_line[0]]['end'] = int(each_line[3])
+						gene_dict[each_line[1]][each_line[0]]['gene_name'] = str(each_line[4])
+						gene_dict[each_line[1]][each_line[0]]['transcript_count'] = int(each_line[5])
+			meta_data.find_host_gene(gene_dict, intronic_mirna_map)
+
+
+	def find_host_gene(gene_dict, intronic_mirna_map):
+		print('Finding hosts.')
+		final_dict = {}
+		with open('../../data/chr_coordinates_of_mirna.csv', 'r') as mirna_file:
+			mirna_coordinates = csv.reader(mirna_file, dialect = 'excel', skipinitialspace = True)
+			
+			for line in mirna_coordinates:
+				if line[3] in intronic_mirna_map.keys():
+					final_dict[line[3]] = {}
+					print('For miRNA : ' + str(line[3]))
+					chro = str(line[0])
+					mirna_start = line[1]
+					mirna_end = line[2]
+					for each in gene_dict[chro].keys():
+						if gene_dict[chro][each]['start'] <= int(mirna_start) and int(mirna_end) <= gene_dict[chro][each]['end']:
+							if 'MIR' in str(gene_dict[chro][each]['gene_name']):
+								final_dict[line[3]]['miRNA Transcript Count'] = gene_dict[chro][each]['transcript_count']
+								final_dict[line[3]]['miRNA Name'] = gene_dict[chro][each]['gene_name']
+							else:
+								final_dict[line[3]]['Host Gene'] = gene_dict[chro][each]['gene_name']
+								final_dict[line[3]]['Host Gene Transcript Count'] = gene_dict[chro][each]['transcript_count']
+								# print('Gene : ' + str(gene_dict[chro][each]['gene_name']))
+								# print('In dict: ' + final_dict[line[3]]['Host Gene'])
+								# print('Transcript count : ' + str(gene_dict[chro][each]['transcript_count']))
+			for mirna in intronic_mirna_map.keys():
+				if mirna in final_dict:
+					pass
+				else:
+					final_dict[mirna] = {}
+			
+			meta_data.add_target_transcript_count(gene_dict, final_dict, intronic_mirna_map)
+
+	
+	def add_target_transcript_count(gene_dict, final_dict, intronic_mirna_map):
+		mirmap_dict = meta_data.form_affinity_map()
+		print('Appending targets.')
+		count = 0
+		for mirna in intronic_mirna_map.keys():
+			count+=1
+			tot = len(intronic_mirna_map.keys())
+			print(('For miRNA: ' + str(mirna) + ', {0}/{1}').format(str(count), str(tot)))
+			final_dict[mirna]['Target Gene with Transcript Count'] = []
+			for target in intronic_mirna_map[mirna]:
+				m = meta_data.target_gene_expression(gene_dict, target)		# Transcript Count
+				aff = meta_data.append_affinity(mirmap_dict, mirna, target)	# Affinity
+				tup = (target, m, aff)
+				final_dict[mirna]['Target Gene with Transcript Count'].append(tup)
+			# print(final_dict[mirna])
+		jsonify(final_dict ,'../output_data/mirna_meta_data_test.json')
+	
+	'''
+	def find_target_gene_expression(target_gene):
+		with open('../../data/gene_coordinates_from_ensembl.tsv', 'r') as gene_file:
+			gene_data = csv.reader(gene_file, dialect = 'excel-tab', skipinitialspace = True)
+			next(gene_data, None)
+			for each_line in gene_data:
+				if str(each_line[4]) == str(target_gene):
+					value = int(each_line[5])
+					gene_file.seek(0)
+					return value
+				else:
+					# Also returns 0 for the genes whose transcript count is not known to us
+					value = int(0)
+			gene_file.seek(0)
+			return value
+	'''
+
+	def target_gene_expression(gene_dict, target_gene):
+		value = None
+		for chro in gene_dict.keys():
+			for ensembl_id in gene_dict[chro].keys():
+				if 'gene_name' in gene_dict[chro][ensembl_id].keys():
+					if str(target_gene) == str(gene_dict[chro][ensembl_id]['gene_name']):
+						value = gene_dict[chro][ensembl_id]['transcript_count']
+						break
+		return value
+
+	def form_affinity_map():
+		print('Forming affinity map from mirmap.')
+		mirmap_dict = {}
+		with open('../../data/sample.csv') as infile:
+			mirmap_reader = csv.reader(infile, dialect = 'excel', skipinitialspace = True)
+			next(mirmap_reader)
+			for line in mirmap_reader:
+				if not line[1] in mirmap_dict:
+					mirmap_dict[line[1]] = {}
+					mirmap_dict[line[1]].setdefault(line[8], []).append(line[20])
+				else:
+					mirmap_dict[line[1]].setdefault(line[8], []).append(line[20])
+		return mirmap_dict
+
+	def append_affinity(mirmap_dict, mirna, target):
+		if mirna in mirmap_dict.keys() and target in mirmap_dict[mirna].keys():
+			print('Found affinity value.')
+			aff = min(mirmap_dict[mirna][target])
+			return aff
+			# tup = (target_tup[0], target_tup[1], aff)
+		else:
+			return None
+
 def jsonify(dictionary, filename, text='None'):
 	a = json.dumps(dictionary, sort_keys=True, indent=4, separators=(',', ': '))
 	with open(str(filename), 'w') as outfile:
@@ -59,9 +201,26 @@ def jsonify(dictionary, filename, text='None'):
 
 if __name__ == '__main__':
 	instance = restructure_data()
+	meta_data_instance = meta_data()
+	mirbase_meta_data_instance = collect_meta_data_from_mirbase()
+	cross_references_instance = cross_references_from_ncbi()
 	with open('../../data/hsa_MTI.tsv', 'r') as infile:
 		mirtar = csv.reader(infile, dialect = 'excel-tab', skipinitialspace = True)
-		intronic_mirna_map = instance.generate_map(mirtar)
+		# intronic_mirna_map = instance.generate_map(mirtar)
 
-	# meta_data_intance = meta_data()
-	# meta_data_intance.ensembl_coordinates_to_py(intronic_mirna_map)
+		# mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
+	with open('../output_data/mirna_map_dict.json', 'r') as infile:
+		intronic_mirna_map = json.loads(infile.read())
+		mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
+
+		# mirbase_meta_data_instance.extract(mirna_meta_data)
+		# mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extend_meta_data()
+	# with open('../output_data/mirna_meta_data_test.json', 'r') as infile:
+	# 	mirna_meta_data = json.loads(infile.read())
+	# 	mirbase_meta_data_instance.extract(mirna_meta_data)
+	# 	mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extend_meta_data()
+
+	# with open('./mirna_data/Homo_sapiens.gene_info', 'r') as infile:
+	# 	data = csv.reader(infile, 'excel-tab')
+	# 	next(data)
+	# 	cross_references_from_ncbi.id_dict(data, mirna_meta_data_including_mirbase)
