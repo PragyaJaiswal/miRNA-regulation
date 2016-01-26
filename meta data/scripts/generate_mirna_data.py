@@ -294,7 +294,7 @@ class cross_references_from_ncbi(object):
 				for ele in lis:
 					if not ele in mirna_meta_data_including_mirbase[mirna]['Database cross-references']:
 						mirna_meta_data_including_mirbase[mirna]['Database cross-references'].append(ele)
-		jsonify(mirna_meta_data_including_mirbase, '../output_data/miRNA_meta_data_complete.json')
+		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna_meta_data_complete.json')
 		
 
 def jsonify(dictionary, filename, text='None'):
