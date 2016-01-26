@@ -14,12 +14,9 @@ class restructure_data(object):
 	def generate_map(self, mirtar):
 		next(mirtar)
 		mirna_map = {}
-		# gene_map = {}
 		for line in mirtar:
 			mirna_map.setdefault(line[1], []).append(line[3])
-			# gene_map.setdefault(line[3], []).append(line[1])
 		print(len(mirna_map.keys()))
-		# print(len(gene_map.keys()))
 
 		with open('../../data/chr_coordinates_of_mirna.csv', 'r') as mirna_file:
 			mirna_coordinates = csv.reader(mirna_file, dialect = 'excel', skipinitialspace = True)
@@ -44,7 +41,7 @@ class restructure_data(object):
 							else:
 								pass
 					infile.seek(0)
-			jsonify(final_intronic_dict, '../output_data/mirna_map_dict.json')
+			jsonify(final_intronic_dict, '../output_data/mirna/mirna_map_dict.json')
 			print(len(final_intronic_dict.keys()))
 			return final_intronic_dict
 
@@ -137,7 +134,7 @@ class meta_data(object):
 				tup = (target, m, aff)
 				final_dict[mirna]['Target Gene with Transcript Count'].append(tup)
 			# print(final_dict[mirna])
-		jsonify(final_dict ,'../output_data/mirna_meta_data_test.json')
+		jsonify(final_dict ,'../output_data/mirna/mirna_meta_data_test.json')
 	
 	'''
 	def find_target_gene_expression(target_gene):
@@ -260,7 +257,7 @@ class collect_meta_data_from_mirbase(object):
 
 					mirna_meta_data_including_mirbase[mirna]['family'] = fam_mirna
 
-		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna_meta_data_including_mirbase.json')
+		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna/mirna_meta_data_including_mirbase.json')
 		return mirna_meta_data_including_mirbase
 
 
@@ -294,7 +291,7 @@ class cross_references_from_ncbi(object):
 				for ele in lis:
 					if not ele in mirna_meta_data_including_mirbase[mirna]['Database cross-references']:
 						mirna_meta_data_including_mirbase[mirna]['Database cross-references'].append(ele)
-		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna_meta_data_complete.json')
+		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna/mirna_meta_data_complete.json')
 		
 
 def jsonify(dictionary, filename, text='None'):
@@ -317,12 +314,12 @@ if __name__ == '__main__':
 		intronic_mirna_map = instance.generate_map(mirtar)
 
 		mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
-	# with open('../output_data/mirna_map_dict.json', 'r') as infile:
+	# with open('../output_data/mirna/mirna_map_dict.json', 'r') as infile:
 	# 	intronic_mirna_map = json.loads(infile.read())
 	# 	mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
 
 		mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extract(mirna_meta_data)
-	# with open('../output_data/mirna_meta_data_test.json', 'r') as infile:
+	# with open('../output_data/mirna/mirna_meta_data_test.json', 'r') as infile:
 	# 	mirna_meta_data = json.loads(infile.read())
 	# 	mirna_meta_data_including_mirbase = mirbase_meta_data_instance.extract(mirna_meta_data)
 
