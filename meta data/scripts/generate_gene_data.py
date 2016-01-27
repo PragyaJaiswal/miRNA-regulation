@@ -18,4 +18,39 @@ class restructure_data(object):
 			gene_map.setdefault(line[3], []).append(line[1])
 		print(len(gene_map.keys()))
 
-		jsonify(final_intronic_dict, '../output_data/gene/gene_map_dict.json')
+		jsonify(gene_map, '../output_data/gene/gene_map_dict.json')
+		restructure_data.append_host_target_mirna(gene_map)
+
+	def append_host_target_mirna(gene_map):
+		with open('../output_data/mirna/mirna_meta_data_complete.json') as infile:
+			miRNA_meta_data = json.loads(infile.read())
+			gene_data_new = {}
+			for mirna in miRNA_meta_data.keys():
+				if 'Host Gene' in miRNA_meta_data[mirna].keys() and not miRNA_meta_data[mirna]['Host Gene'] == '':
+					gene = miRNA_meta_data[mirna]['Host Gene']
+					
+					gene_data_new.setdefault(gene, {})
+					gene_data_new[gene].setdefault('Host for', []).append(mirna)
+
+					if gene in gene_map.keys():
+						gene_data_new[gene]['Target for'] = gene_map[gene]
+					else:
+						gene_data_new[gene]['Target for'] = ''
+
+			print(len(gene_data_new.keys()))
+
+def jsonify(dictionary, filename, text='None'):
+	a = json.dumps(dictionary, sort_keys=True, indent=4, separators=(',', ': '))
+	with open(str(filename), 'w') as outfile:
+		if text == 'None':
+			outfile.write(a)
+		else:
+			outfile.write(text + ' = ')
+			outfile.write(a)
+
+if __name__ == '__main__':
+	instance = restructure_data()
+
+	with open('../../data/hsa_MTI.tsv', 'r') as infile:
+		mirtar = csv.reader(infile, dialect = 'excel-tab', skipinitialspace = True)
+		gene_map = instance.generate_map(mirtar)
