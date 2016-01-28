@@ -7,3 +7,4 @@ Requirements -
 Run -
 1. generate_mirna_data.py
 2. generate_gene_data.py
+3. stats.py
