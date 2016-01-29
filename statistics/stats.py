@@ -77,23 +77,6 @@ class stats(object):
 		print('Range for affinity values of genes:\n' + str(affinity_range))
 
 
-	# Has issues.
-	def mmi_cutoff_value(self):
-		mmi_dict = {}
-		for mirna in predicted_map_with_keq_mmi_exp.keys():
-			for target in predicted_map_with_keq_mmi_exp[mirna].keys():
-				if not predicted_map_with_keq_mmi_exp[mirna][target] == []:
-					# if len(predicted_map_with_keq_mmi_exp[mirna][target]) == 31:
-					# 	print(mirna)
-					mmi_dict[target] = predicted_map_with_keq_mmi_exp[mirna][target][-1]
-
-		# print(min(mmi_dict.values()))
-		# print(max(mmi_dict.values()))
-
-		ranges = (min(mmi_dict.values()), max(mmi_dict.values()))
-		print('\nRange for [m-mi] complex:\n' + str(ranges))
-
-
 class mirna_stats(object):
 	"""docstring for mirna_stats"""
 	def __init__(self):
@@ -191,7 +174,6 @@ if __name__ == '__main__':
 		stats_instance.all_target_interactions(miRNA_meta_data)
 		stats_instance.all_host_interactions(miRNA_meta_data)
 		stats_instance.range_of_gene_trans_count_affinity(miRNA_meta_data)
-		# mmi_cutoff_value = stats_instance.mmi_cutoff_value(miRNA_meta_data)
 
 		mirna_stats_instance.mirna_with_max_interactions(miRNA_meta_data)
 		mirna_stats_instance.mirna_interacting_with_host(miRNA_meta_data)
