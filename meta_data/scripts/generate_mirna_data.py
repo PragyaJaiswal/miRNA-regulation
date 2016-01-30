@@ -292,10 +292,40 @@ class cross_references_from_ncbi(object):
 					if not ele in mirna_meta_data_including_mirbase[mirna]['Database cross-references']:
 						mirna_meta_data_including_mirbase[mirna]['Database cross-references'].append(ele)
 		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna/mirna_meta_data_complete.json')
+		weights.mmi(mirna_meta_data_including_mirbase)
+
+class weights(object):
+	"""docstring for weights"""
+	def __init__(self):
+		pass
+
+	def weights(self, mirna_meta_data_complete):
+		mirna_meta_data_with_weights = {}
+		for mirna in mirna_meta_data_complete.keys():
+			mirna_meta_data_with_weights[mirna] = {}
+			for key, value in mirna_meta_data_complete[mirna].items():
+				if not key == 'Target Gene with Transcript Count':
+					mirna_meta_data_with_weights[mirna][key] = value
+			
+			if 'Target Gene with Transcript Count' in mirna_meta_data_complete[mirna].keys():
+				for each_target in mirna_meta_data_complete[mirna]['Target Gene with Transcript Count']:
+					if each_target[2] == None:
+						mmi = None
+					else:
+						del_g_binding = each_target[2]
+						keq = float(math.exp(-1 * del_g_binding/(0.008314 * 298)))
+						if 'Host Gene'in miRNA_meta_data[mirna].keys() and not miRNA_meta_data[mirna]['Host Gene'] == '':
+							m = each_target[1]
+							mi = miRNA_meta_data[mirna]['Host Gene Transcript Count']
+							mmi = keq * m * mi
+							# print(mmi)
+					each_target.append(mmi)
+					mirna_meta_data_with_weights[mirna]['Target Gene with Transcript Count'].append(each_target)
+		jsonify(mirna_meta_data_with_weights, '../output_data/mirna/mirna_meta_data_with_weights.json')
 		
 
 def jsonify(dictionary, filename, text='None'):
-	a = json.dumps(dictionary, sort_keys=True, indent=4, separators=(',', ': '))
+	a = json.dumps(dictionary, sort_keys=True, indent=2, separators=(',', ': '))
 	with open(str(filename), 'w') as outfile:
 		if text == 'None':
 			outfile.write(a)
