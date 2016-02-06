@@ -294,6 +294,7 @@ class cross_references_from_ncbi(object):
 		jsonify(mirna_meta_data_including_mirbase, '../output_data/mirna/mirna_meta_data_complete.json')
 		weights.mmi(mirna_meta_data_including_mirbase)
 
+
 class weights(object):
 	"""docstring for weights"""
 	def __init__(self):
