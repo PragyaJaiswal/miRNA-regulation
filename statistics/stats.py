@@ -113,6 +113,17 @@ class mirna_stats(object):
 		print('Number of miRNAs targeting the host genes:\n' + str(len(miRNA_lis)))
 		print('miRNAs targeting the host genes:\n' + str(miRNA_lis))
 
+	def genes_targetting_mirna_whose_host_is_known(self, miRNA_meta_data):
+		target_lis = []
+		for mirna in miRNA_meta_data.keys():
+			if 'Host Gene' in miRNA_meta_data[mirna].keys():
+				if 'Target Gene with Transcript Count' in miRNA_meta_data[mirna].keys():
+					for target in miRNA_meta_data[mirna]['Target Gene with Transcript Count']:
+						if not target[0] in target_lis:
+							target_lis.append(target[0])
+
+		print('\nNumber of genes targetted by miRNAs whose host is known:\n' + str(len(target_lis)))
+
 
 class gene_stats(object):
 	"""docstring for gene_stats"""
@@ -134,6 +145,9 @@ class gene_stats(object):
 				lis.append((key,value))
 
 		print('\nGene being targetted most by miRNAs:\n' + str(lis))
+
+		lis = sorted(gene_interact_dict.items(), key=operator.itemgetter(1), reverse=True)
+		print(lis[0:20])
 
 	def gene_having_mirna_as_host_and_target(self, gene_meta_data):
 		gene_lis = []
@@ -177,6 +191,7 @@ if __name__ == '__main__':
 
 		mirna_stats_instance.mirna_with_max_interactions(miRNA_meta_data)
 		mirna_stats_instance.mirna_interacting_with_host(miRNA_meta_data)
+		mirna_stats_instance.genes_targetting_mirna_whose_host_is_known(miRNA_meta_data)
 
 	with open('../meta_data/output_data/gene/gene_meta_data.json', 'r') as infile:
 		gene_meta_data = json.loads(infile.read())
