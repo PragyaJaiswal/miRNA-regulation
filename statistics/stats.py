@@ -101,6 +101,7 @@ class mirna_stats(object):
 	def mirna_interacting_with_host(self, miRNA_meta_data):
 		miRNA_lis = []
 		mirna_targets = {}
+		mirna_whose_host_is_not_known = []
 		for mirna in miRNA_meta_data.keys():
 			target_lis = []
 			if 'Host Gene' in miRNA_meta_data[mirna].keys():
@@ -109,6 +110,8 @@ class mirna_stats(object):
 					mirna_targets[mirna] = len(miRNA_meta_data[mirna]['Target Gene with Transcript Count'])
 					for target in miRNA_meta_data[mirna]['Target Gene with Transcript Count']:
 						target_lis.append(target[0])
+			else:
+				mirna_whose_host_is_not_known.append(mirna)
 
 			if host in target_lis:
 				miRNA_lis.append(mirna)
@@ -121,6 +124,12 @@ class mirna_stats(object):
 			lis.append((mirna, mirna_targets[mirna], miRNA_meta_data[mirna]['Host Gene']))
 		print(lis)
 		print(len(lis))
+
+		print('miRNAs whose host gene is not known:')
+		with open('./output/mirna_whose_host_is_not_known.txt', 'w') as m:
+			for mirna in mirna_whose_host_is_not_known:
+				m.write(mirna + '\n')
+		print(len(mirna_whose_host_is_not_known))
 
 	def genes_targetting_mirna_whose_host_is_known(self, miRNA_meta_data):
 		target_lis = []
