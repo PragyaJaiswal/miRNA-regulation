@@ -100,18 +100,27 @@ class mirna_stats(object):
 
 	def mirna_interacting_with_host(self, miRNA_meta_data):
 		miRNA_lis = []
+		mirna_targets = {}
 		for mirna in miRNA_meta_data.keys():
 			target_lis = []
 			if 'Host Gene' in miRNA_meta_data[mirna].keys():
 				host = miRNA_meta_data[mirna]['Host Gene']
 				if 'Target Gene with Transcript Count' in miRNA_meta_data[mirna].keys():
+					mirna_targets[mirna] = len(miRNA_meta_data[mirna]['Target Gene with Transcript Count'])
 					for target in miRNA_meta_data[mirna]['Target Gene with Transcript Count']:
 						target_lis.append(target[0])
+
 			if host in target_lis:
 				miRNA_lis.append(mirna)
 		
 		print('Number of miRNAs targeting the host genes:\n' + str(len(miRNA_lis)))
-		print('miRNAs targeting the host genes:\n' + str(miRNA_lis))
+		print('miRNAs targeting the host genes:')
+
+		lis = []
+		for mirna in miRNA_lis:
+			lis.append((mirna, mirna_targets[mirna], miRNA_meta_data[mirna]['Host Gene']))
+		print(lis)
+		print(len(lis))
 
 	def genes_targetting_mirna_whose_host_is_known(self, miRNA_meta_data):
 		target_lis = []
