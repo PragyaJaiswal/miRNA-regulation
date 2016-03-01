@@ -26,6 +26,7 @@ class restructure_data(object):
 
 	def check_intronic(mirna_map, mirna_coordinates):
 		final_intronic_dict = {}
+		non_intronic = {}
 		with open('../../data/intron_coordinates_from_ucsc.tsv') as infile:
 			intron_reader = csv.reader(infile, dialect = 'excel-tab', skipinitialspace = True)
 			for line in mirna_coordinates:
@@ -39,6 +40,7 @@ class restructure_data(object):
 							if int(each_line[1]) <= start and end <= int(each_line[2]):
 								final_intronic_dict[mirna] = mirna_map[mirna]
 							else:
+								non_intronic.append(mirna)
 								pass
 					infile.seek(0)
 			jsonify(final_intronic_dict, '../output_data/mirna/mirna_map_dict.json')
