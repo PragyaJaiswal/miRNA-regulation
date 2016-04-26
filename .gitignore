@@ -65,3 +65,4 @@ target/
 /meta data/output_data/mirna/mirna_meta_data_test.json
 /meta data/output_data/mirna/mirna_meta_data_including_mirbase.json
 /meta data/output_data/mirna/mirna_meta_data_complete.json
+/tissue_wise_ranks/
