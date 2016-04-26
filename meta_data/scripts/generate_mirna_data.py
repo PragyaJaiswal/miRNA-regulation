@@ -40,12 +40,14 @@ class restructure_data(object):
 							if int(each_line[1]) <= start and end <= int(each_line[2]):
 								final_intronic_dict[mirna] = mirna_map[mirna]
 							else:
-								non_intronic.append(mirna)
-								pass
+								non_intronic[mirna] = []
 					infile.seek(0)
 			jsonify(final_intronic_dict, '../output_data/mirna/mirna_map_dict.json')
 			print(len(final_intronic_dict.keys()))
 			return final_intronic_dict
+		# with open('../output_data/mirna/non_intronic.txt', 'w') as minion:
+		# 	a = json.dump(non_intronic, sort_keys=True, indent=2, separators=(',', ': '))
+		# 	minion.write(a)
 
 
 class meta_data(object):
@@ -345,7 +347,7 @@ if __name__ == '__main__':
 	with open('../../data/hsa_MTI.tsv', 'r') as infile:
 		mirtar = csv.reader(infile, dialect = 'excel-tab', skipinitialspace = True)
 		intronic_mirna_map = instance.generate_map(mirtar)
-
+	'''
 		mirna_meta_data = meta_data_instance.ensembl_coordinates_to_py(intronic_mirna_map)
 	# with open('../output_data/mirna/mirna_map_dict.json', 'r') as infile:
 	# 	intronic_mirna_map = json.loads(infile.read())
@@ -360,3 +362,4 @@ if __name__ == '__main__':
 			data = csv.reader(infile, 'excel-tab')
 			next(data)
 			cross_references_instance.id_dict(data, mirna_meta_data_including_mirbase)
+	'''
