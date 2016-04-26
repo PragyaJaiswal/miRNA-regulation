@@ -1,0 +1,4 @@
+HUMAN|HGNC=4849|UniProtKB=O43614	Orexin receptor type 2;HCRTR2;ortholog	OREXIN RECEPTOR TYPE 2 (PTHR24241:SF75)	G-protein coupled receptor(PC00197)	Homo sapiens
+HUMAN|HGNC=3969|UniProtKB=P23945	Follicle-stimulating hormone receptor;FSHR;ortholog	FOLLICLE-STIMULATING HORMONE RECEPTOR (PTHR24372:SF5)	receptor(PC00197);extracellular matrix protein(PC00102)	Homo sapiens
+HUMAN|HGNC=6585|UniProtKB=P22888	Lutropin-choriogonadotropic hormone receptor;LHCGR;ortholog	LUTROPIN-CHORIOGONADOTROPIC HORMONE RECEPTOR (PTHR24372:SF1)	receptor(PC00197);extracellular matrix protein(PC00102)	Homo sapiens
+HUMAN|HGNC=4848|UniProtKB=O43613	Orexin receptor type 1;HCRTR1;ortholog	OREXIN RECEPTOR TYPE 1 (PTHR24241:SF30)	G-protein coupled receptor(PC00197)	Homo sapiens

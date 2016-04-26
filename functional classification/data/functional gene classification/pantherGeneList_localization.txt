@@ -1,0 +1,5 @@
+HUMAN|HGNC=3072|UniProtKB=Q16828	Dual specificity protein phosphatase 6;DUSP6;ortholog	DUAL SPECIFICITY PROTEIN PHOSPHATASE 6 (PTHR10159:SF45)		Homo sapiens
+HUMAN|HGNC=12434|UniProtKB=P42681	Tyrosine-protein kinase TXK;TXK;ortholog	TYROSINE-PROTEIN KINASE TXK (PTHR24418:SF247)	non-receptor tyrosine protein kinase(PC00220);non-receptor tyrosine protein kinase(PC00137)	Homo sapiens
+HUMAN|HGNC=613|UniProtKB=P02649	Apolipoprotein E;APOE;ortholog	APOLIPOPROTEIN E (PTHR18976:SF2)		Homo sapiens
+HUMAN|HGNC=13480|UniProtKB=Q8IYT8	Serine/threonine-protein kinase ULK2;ULK2;ortholog	SERINE/THREONINE-PROTEIN KINASE ULK2 (PTHR24348:SF18)	non-receptor serine/threonine protein kinase(PC00220);non-receptor serine/threonine protein kinase(PC00137)	Homo sapiens
+HUMAN|HGNC=12558|UniProtKB=O75385	Serine/threonine-protein kinase ULK1;ULK1;ortholog	SERINE/THREONINE-PROTEIN KINASE ULK1 (PTHR24348:SF19)	non-receptor serine/threonine protein kinase(PC00220);non-receptor serine/threonine protein kinase(PC00137)	Homo sapiens
