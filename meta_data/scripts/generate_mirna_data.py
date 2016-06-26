@@ -23,13 +23,46 @@ class restructure_data(object):
 			print(mirna_map[x])
 			input('Enter')
 		lengths = [len(v) for v in mirna_map.values()]
-		print(sum(lengths))
+		print(sum(lengths)) # returns 410620, which is the number of rows in the tsv. Test passes.
+		
+		restructure_data.test()
 		return
 		'''
+
 		with open('../../data/chr_coordinates_of_mirna.csv', 'r') as mirna_file:
 			mirna_coordinates = csv.reader(mirna_file, dialect = 'excel', skipinitialspace = True)
 			intronic_mirna_map = restructure_data.check_intronic(mirna_map, mirna_coordinates)
 			return intronic_mirna_map
+
+	def test():
+		with open('../output_data/mirna/mirna_meta_data_complete.json', 'r') as infile:
+			data = json.load(infile)
+			target_gene_lis = []
+			for mirna in data:
+				if 'Target Gene with Transcript Count' in data[mirna]:
+					for target in data[mirna]['Target Gene with Transcript Count']:
+						target_gene_lis.append(target[0])
+			num_of_target_genes = len(set(target_gene_lis))	#14317 unique target genes
+			print(num_of_target_genes, 'Number of target Genes')
+
+			host_gene_lis = []
+			for mirna in data:
+				if 'Host Gene' in data[mirna].keys():
+					host_gene_lis.append(data[mirna]['Host Gene'])
+			total_host_genes = len(set(host_gene_lis))
+			print(total_host_genes, 'Total number of host genes')
+
+			unique_host_gene_lis = []
+			for gene in host_gene_lis:
+				if gene in target_gene_lis:
+					pass
+				else:
+					unique_host_gene_lis.append(gene)
+			host_genes_added_to_total_genes = len(set(unique_host_gene_lis))
+			print(host_genes_added_to_total_genes, 'Host Genes added')
+
+			total_num_of_genes_in_network = num_of_target_genes + host_genes_added_to_total_genes
+			print(total_num_of_genes_in_network, 'Total num of genes in network.')
 
 
 	def check_intronic(mirna_map, mirna_coordinates):
