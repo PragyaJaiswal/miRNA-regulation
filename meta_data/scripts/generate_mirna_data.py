@@ -14,16 +14,27 @@ class restructure_data(object):
 	def generate_map(self, mirtar):
 		next(mirtar)
 		mirna_map = {}
+		'''
+		# Testing purpose
+		target_genes = []
+		for line in mirtar:
+			target_genes.append(line[3])
+		print(len(set(target_genes)))
+		'''
+
 		for line in mirtar:
 			mirna_map.setdefault(line[1], []).append(line[3])
 		print(len(mirna_map.keys()))
+		
 		'''
 		# Testing purpose
+		target_genes = []
 		for x in mirna_map:
-			print(mirna_map[x])
-			input('Enter')
-		lengths = [len(v) for v in mirna_map.values()]
-		print(sum(lengths)) # returns 410620, which is the number of rows in the tsv. Test passes.
+			target_genes.extend(mirna_map[x])
+		print(len(target_genes))	# returns 410620, which is the number of rows in the tsv. Test passes.
+		print(len(set(target_genes)))	# return 14894, number of target genes of all 2649 miRNAs from mirTarBase
+		# lengths = [len(v) for v in mirna_map.values()]
+		# print(sum(lengths)) # returns 410620, which is the number of rows in the tsv. Test passes.
 		
 		restructure_data.test()
 		return
@@ -42,7 +53,7 @@ class restructure_data(object):
 				if 'Target Gene with Transcript Count' in data[mirna]:
 					for target in data[mirna]['Target Gene with Transcript Count']:
 						target_gene_lis.append(target[0])
-			num_of_target_genes = len(set(target_gene_lis))	#14317 unique target genes
+			num_of_target_genes = len(set(target_gene_lis))	#14317 unique target genes of 'intronic' miRNAs
 			print(num_of_target_genes, 'Number of target Genes')
 
 			host_gene_lis = []
