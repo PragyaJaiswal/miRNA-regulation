@@ -17,7 +17,15 @@ class restructure_data(object):
 		for line in mirtar:
 			mirna_map.setdefault(line[1], []).append(line[3])
 		print(len(mirna_map.keys()))
-
+		'''
+		# Testing purpose
+		for x in mirna_map:
+			print(mirna_map[x])
+			input('Enter')
+		lengths = [len(v) for v in mirna_map.values()]
+		print(sum(lengths))
+		return
+		'''
 		with open('../../data/chr_coordinates_of_mirna.csv', 'r') as mirna_file:
 			mirna_coordinates = csv.reader(mirna_file, dialect = 'excel', skipinitialspace = True)
 			intronic_mirna_map = restructure_data.check_intronic(mirna_map, mirna_coordinates)
